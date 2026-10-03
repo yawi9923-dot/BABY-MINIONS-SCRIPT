@@ -1,0 +1,550 @@
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+
+local player = Players.LocalPlayer
+
+local gui = Instance.new("ScreenGui")
+gui.Name = "BabyMinionsScriptHub"
+gui.ResetOnSpawn = false
+gui.Parent = player:WaitForChild("PlayerGui")
+
+local NORMAL_SIZE = UDim2.fromOffset(620, 400)
+local MINI_SIZE = UDim2.fromOffset(158, 38)
+local CENTER_POSITION = UDim2.fromScale(0.5, 0.5)
+
+local tweenInfo = TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
+
+local function tween(object, properties)
+	local t = TweenService:Create(object, tweenInfo, properties)
+	t:Play()
+	return t
+end
+
+local main = Instance.new("Frame")
+main.Name = "Main"
+main.Size = NORMAL_SIZE
+main.Position = CENTER_POSITION
+main.AnchorPoint = Vector2.new(0.5, 0.5)
+main.BackgroundColor3 = Color3.fromRGB(24, 24, 28)
+main.BorderSizePixel = 0
+main.Parent = gui
+
+local mainCorner = Instance.new("UICorner")
+mainCorner.CornerRadius = UDim.new(0, 24)
+mainCorner.Parent = main
+
+local mainStroke = Instance.new("UIStroke")
+mainStroke.Color = Color3.fromRGB(55, 55, 65)
+mainStroke.Transparency = 0.25
+mainStroke.Parent = main
+
+local header = Instance.new("Frame")
+header.Name = "Header"
+header.Size = UDim2.new(1, 0, 0, 54)
+header.BackgroundTransparency = 1
+header.Parent = main
+
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, -115, 1, 0)
+title.Position = UDim2.fromOffset(18, 0)
+title.BackgroundTransparency = 1
+title.Text = "BABY MINIONS SCRIPT HUB"
+title.TextColor3 = Color3.fromRGB(245, 245, 248)
+title.TextSize = 16
+title.Font = Enum.Font.GothamBold
+title.TextXAlignment = Enum.TextXAlignment.Left
+title.Parent = header
+
+local minimize = Instance.new("TextButton")
+minimize.Name = "Minimize"
+minimize.Size = UDim2.fromOffset(36, 30)
+minimize.Position = UDim2.new(1, -82, 0, 12)
+minimize.BackgroundColor3 = Color3.fromRGB(38, 38, 44)
+minimize.Text = "—"
+minimize.TextColor3 = Color3.fromRGB(225, 225, 230)
+minimize.TextSize = 18
+minimize.Font = Enum.Font.GothamBold
+minimize.AutoButtonColor = false
+minimize.Parent = header
+
+local minCorner = Instance.new("UICorner")
+minCorner.CornerRadius = UDim.new(0, 8)
+minCorner.Parent = minimize
+
+local close = Instance.new("TextButton")
+close.Name = "Close"
+close.Size = UDim2.fromOffset(36, 30)
+close.Position = UDim2.new(1, -42, 0, 12)
+close.BackgroundColor3 = Color3.fromRGB(38, 38, 44)
+close.Text = "×"
+close.TextColor3 = Color3.fromRGB(225, 225, 230)
+close.TextSize = 20
+close.Font = Enum.Font.GothamBold
+close.AutoButtonColor = false
+close.Parent = header
+
+local closeCorner = Instance.new("UICorner")
+closeCorner.CornerRadius = UDim.new(0, 8)
+closeCorner.Parent = close
+
+local sidebar = Instance.new("Frame")
+sidebar.Name = "Sidebar"
+sidebar.Size = UDim2.new(0, 175, 1, -54)
+sidebar.Position = UDim2.fromOffset(0, 54)
+sidebar.BackgroundColor3 = Color3.fromRGB(20, 20, 24)
+sidebar.BorderSizePixel = 0
+sidebar.Parent = main
+
+local tabs = {
+	"Steal an Egg",
+	"Ride a Pet",
+	"Hospital Anomaly"
+}
+
+local content = Instance.new("Frame")
+content.Name = "Content"
+content.Size = UDim2.new(1, -175, 1, -54)
+content.Position = UDim2.fromOffset(175, 54)
+content.BackgroundTransparency = 1
+content.Parent = main
+
+local pages = {}
+local tabButtons = {}
+
+for i, tabName in ipairs(tabs) do
+	local button = Instance.new("TextButton")
+	button.Name = tabName .. "Button"
+	button.Size = UDim2.new(1, -20, 0, 42)
+	button.Position = UDim2.fromOffset(10, 10 + ((i - 1) * 50))
+	button.BackgroundColor3 = Color3.fromRGB(29, 29, 34)
+	button.Text = tabName
+	button.TextColor3 = Color3.fromRGB(190, 190, 198)
+	button.TextSize = 13
+	button.Font = Enum.Font.GothamMedium
+	button.AutoButtonColor = false
+	button.Parent = sidebar
+
+	local buttonCorner = Instance.new("UICorner")
+	buttonCorner.CornerRadius = UDim.new(0, 9)
+	buttonCorner.Parent = button
+
+	tabButtons[tabName] = button
+
+	local page = Instance.new("ScrollingFrame")
+	page.Name = tabName
+	page.Size = UDim2.fromScale(1, 1)
+	page.CanvasSize = UDim2.new(0, 0, 0, 0)
+	page.AutomaticCanvasSize = Enum.AutomaticSize.Y
+	page.ScrollBarThickness = 3
+	page.BackgroundTransparency = 1
+	page.Visible = i == 1
+	page.Parent = content
+
+	pages[tabName] = page
+
+	button.MouseButton1Click:Connect(function()
+		for name, otherPage in pairs(pages) do
+			otherPage.Visible = name == tabName
+		end
+
+		for name, otherButton in pairs(tabButtons) do
+			if name == tabName then
+				tween(otherButton, {
+					BackgroundColor3 = Color3.fromRGB(65, 65, 82)
+				})
+			else
+				tween(otherButton, {
+					BackgroundColor3 = Color3.fromRGB(29, 29, 34)
+				})
+			end
+		end
+	end)
+end
+
+tabButtons["Steal an Egg"].BackgroundColor3 = Color3.fromRGB(65, 65, 82)
+
+local function createScriptCard(parent, scriptName, scriptCode, index)
+	local card = Instance.new("Frame")
+	card.Size = UDim2.new(1, -36, 0, 82)
+	card.Position = UDim2.fromOffset(18, 18 + ((index - 1) * 94))
+	card.BackgroundColor3 = Color3.fromRGB(30, 30, 36)
+	card.BorderSizePixel = 0
+	card.Parent = parent
+
+	local cardCorner = Instance.new("UICorner")
+	cardCorner.CornerRadius = UDim.new(0, 11)
+	cardCorner.Parent = card
+
+	local nameLabel = Instance.new("TextLabel")
+	nameLabel.Size = UDim2.new(1, -115, 0, 30)
+	nameLabel.Position = UDim2.fromOffset(16, 9)
+	nameLabel.BackgroundTransparency = 1
+	nameLabel.Text = scriptName
+	nameLabel.TextColor3 = Color3.fromRGB(240, 240, 244)
+	nameLabel.TextSize = 14
+	nameLabel.Font = Enum.Font.GothamSemibold
+	nameLabel.TextXAlignment = Enum.TextXAlignment.Left
+	nameLabel.Parent = card
+
+	local textLabel = Instance.new("TextLabel")
+	textLabel.Size = UDim2.new(1, -115, 0, 25)
+	textLabel.Position = UDim2.fromOffset(16, 39)
+	textLabel.BackgroundTransparency = 1
+	textLabel.Text = "Click to execute script"
+	textLabel.TextColor3 = Color3.fromRGB(155, 155, 165)
+	textLabel.TextSize = 12
+	textLabel.Font = Enum.Font.Gotham
+	textLabel.TextXAlignment = Enum.TextXAlignment.Left
+	textLabel.Parent = card
+
+	local play = Instance.new("TextButton")
+	play.Name = "PlayButton"
+	play.Size = UDim2.fromOffset(76, 34)
+	play.Position = UDim2.new(1, -92, 0.5, -17)
+	play.BackgroundColor3 = Color3.fromRGB(70, 130, 90)
+	play.Text = "PLAY"
+	play.TextColor3 = Color3.fromRGB(255, 255, 255)
+	play.TextSize = 11
+	play.Font = Enum.Font.GothamBold
+	play.AutoButtonColor = false
+	play.Parent = card
+
+	local playCorner = Instance.new("UICorner")
+	playCorner.CornerRadius = UDim.new(0, 9)
+	playCorner.Parent = play
+
+	play.MouseEnter:Connect(function()
+		tween(play, {
+			BackgroundColor3 = Color3.fromRGB(82, 155, 108)
+		})
+	end)
+
+	play.MouseLeave:Connect(function()
+		tween(play, {
+			BackgroundColor3 = Color3.fromRGB(70, 130, 90)
+		})
+	end)
+
+	play.MouseButton1Click:Connect(function()
+		local success, err = pcall(function()
+			loadstring(scriptCode)()
+		end)
+
+		if success then
+			play.Text = "EXECUTED"
+			play.BackgroundColor3 = Color3.fromRGB(60, 150, 80)
+
+			task.delay(1.5, function()
+				if play and play.Parent then
+					play.Text = "PLAY"
+					tween(play, {
+						BackgroundColor3 = Color3.fromRGB(70, 130, 90)
+					})
+				end
+			end)
+		else
+			play.Text = "ERROR"
+			play.BackgroundColor3 = Color3.fromRGB(150, 60, 60)
+			warn("[Baby Minions Hub] Failed to execute " .. scriptName .. ": " .. tostring(err))
+
+			task.delay(1.5, function()
+				if play and play.Parent then
+					play.Text = "PLAY"
+					tween(play, {
+						BackgroundColor3 = Color3.fromRGB(70, 130, 90)
+					})
+				end
+			end)
+		end
+	end)
+end
+
+createScriptCard(
+	pages["Steal an Egg"],
+	"AJJANS SCRIPT",
+	'loadstring(game:HttpGet("https://api.luarmor.net/files/v4/loaders/359e97f8618e9008afe5f496184ebb7c.lua"))()',
+	1
+)
+
+createScriptCard(
+	pages["Steal an Egg"],
+	"BEE HUB SCRIPTS",
+	'loadstring(game:HttpGet("https://flowauth.net/v1/loaders/e22ec54f835af2aa547348a15628af66.lua"))()',
+	2
+)
+
+createScriptCard(
+	pages["Steal an Egg"],
+	"SENA BETA SCRIPT",
+	'loadstring(game:HttpGet("https://senahub.xyz/raw/loader"))()',
+	3
+)
+
+createScriptCard(
+	pages["Ride a Pet"],
+	"VINCETORE",
+	'loadstring(game:HttpGet("https://raw.githubusercontent.com/idk953072-crypto/Ride-a-Pet/refs/heads/main/Vincitore.lua"))()',
+	1
+)
+
+createScriptCard(
+	pages["Hospital Anomaly"],
+	"STE SCRIPT",
+	'loadstring(game:HttpGet("https://raw.githubusercontent.com/SteWasHere/Hub/refs/heads/main/loader.lua"))()',
+	1
+)
+
+local minimized = false
+
+local miniPosition = UDim2.fromScale(0.5, 0.5)
+
+local draggingMini = false
+local dragStart = nil
+local dragStartPosition = nil
+local miniDragConnection = nil
+
+local miniDragArea = Instance.new("TextButton")
+miniDragArea.Name = "MiniDragArea"
+miniDragArea.Size = UDim2.new(1, -42, 1, 0)
+miniDragArea.Position = UDim2.fromOffset(0, 0)
+miniDragArea.BackgroundTransparency = 1
+miniDragArea.Text = ""
+miniDragArea.AutoButtonColor = false
+miniDragArea.Visible = false
+miniDragArea.ZIndex = 10
+miniDragArea.Parent = main
+
+local miniTitle = Instance.new("TextLabel")
+miniTitle.Name = "MiniTitle"
+miniTitle.Size = UDim2.new(1, -55, 1, 0)
+miniTitle.Position = UDim2.fromOffset(12, 0)
+miniTitle.BackgroundTransparency = 1
+miniTitle.Text = "Bby Minions"
+miniTitle.TextColor3 = Color3.fromRGB(245, 245, 248)
+miniTitle.TextSize = 13
+miniTitle.Font = Enum.Font.GothamBold
+miniTitle.TextXAlignment = Enum.TextXAlignment.Left
+miniTitle.Visible = false
+miniTitle.ZIndex = 11
+miniTitle.Parent = main
+
+local miniButton = Instance.new("TextButton")
+miniButton.Name = "MiniButton"
+miniButton.Size = UDim2.fromOffset(28, 28)
+miniButton.Position = UDim2.new(1, -34, 0.5, -14)
+miniButton.BackgroundColor3 = Color3.fromRGB(38, 38, 44)
+miniButton.Text = "+"
+miniButton.TextColor3 = Color3.fromRGB(245, 245, 248)
+miniButton.TextSize = 17
+miniButton.Font = Enum.Font.GothamBold
+miniButton.AutoButtonColor = false
+miniButton.Visible = false
+miniButton.ZIndex = 12
+miniButton.Parent = main
+
+local miniButtonCorner = Instance.new("UICorner")
+miniButtonCorner.CornerRadius = UDim.new(0, 9)
+miniButtonCorner.Parent = miniButton
+
+local function stopMiniDrag()
+	if not draggingMini then
+		return
+	end
+
+	draggingMini = false
+
+	if miniDragConnection then
+		miniDragConnection:Disconnect()
+		miniDragConnection = nil
+	end
+
+	miniPosition = main.Position
+end
+
+local function startMiniDrag(input)
+	if not minimized then
+		return
+	end
+
+	if input.UserInputType ~= Enum.UserInputType.MouseButton1
+		and input.UserInputType ~= Enum.UserInputType.Touch then
+		return
+	end
+
+	draggingMini = true
+	dragStart = input.Position
+	dragStartPosition = main.Position
+
+	if miniDragConnection then
+		miniDragConnection:Disconnect()
+	end
+
+	miniDragConnection = UserInputService.InputChanged:Connect(function(changedInput)
+		if not draggingMini then
+			return
+		end
+
+		if changedInput.UserInputType ~= Enum.UserInputType.MouseMovement
+			and changedInput.UserInputType ~= Enum.UserInputType.Touch then
+			return
+		end
+
+		local delta = changedInput.Position - dragStart
+
+		local newPosition = UDim2.new(
+			dragStartPosition.X.Scale,
+			dragStartPosition.X.Offset + delta.X,
+			dragStartPosition.Y.Scale,
+			dragStartPosition.Y.Offset + delta.Y
+		)
+
+		main.Position = newPosition
+		miniPosition = newPosition
+	end)
+end
+
+miniDragArea.InputBegan:Connect(startMiniDrag)
+
+UserInputService.InputEnded:Connect(function(input)
+	if not draggingMini then
+		return
+	end
+
+	if input.UserInputType == Enum.UserInputType.MouseButton1
+		or input.UserInputType == Enum.UserInputType.Touch then
+		stopMiniDrag()
+	end
+end)
+
+miniButton.MouseButton1Click:Connect(function()
+	if not minimized or draggingMini then
+		return
+	end
+
+	minimized = false
+
+	miniDragArea.Visible = false
+	miniTitle.Visible = false
+	miniButton.Visible = false
+
+	header.Visible = true
+	sidebar.Visible = true
+	content.Visible = true
+
+	tween(main, {
+		Size = NORMAL_SIZE,
+		Position = CENTER_POSITION
+	})
+end)
+
+minimize.MouseButton1Click:Connect(function()
+	if minimized then
+		return
+	end
+
+	minimized = true
+
+	header.Visible = false
+	sidebar.Visible = false
+	content.Visible = false
+
+	tween(main, {
+		Size = MINI_SIZE,
+		Position = miniPosition
+	})
+
+	task.delay(0.2, function()
+		if minimized then
+			miniDragArea.Visible = true
+			miniTitle.Visible = true
+			miniButton.Visible = true
+		end
+	end)
+end)
+
+local confirmation = Instance.new("Frame")
+confirmation.Name = "CloseConfirmation"
+confirmation.Size = UDim2.fromOffset(330, 170)
+confirmation.Position = UDim2.fromScale(0.5, 0.5)
+confirmation.AnchorPoint = Vector2.new(0.5, 0.5)
+confirmation.BackgroundColor3 = Color3.fromRGB(28, 28, 33)
+confirmation.BorderSizePixel = 0
+confirmation.Visible = false
+confirmation.ZIndex = 20
+confirmation.Parent = gui
+
+local confirmCorner = Instance.new("UICorner")
+confirmCorner.CornerRadius = UDim.new(0, 13)
+confirmCorner.Parent = confirmation
+
+local confirmStroke = Instance.new("UIStroke")
+confirmStroke.Color = Color3.fromRGB(70, 70, 80)
+confirmStroke.Transparency = 0.25
+confirmStroke.Parent = confirmation
+
+local confirmTitle = Instance.new("TextLabel")
+confirmTitle.Size = UDim2.new(1, -30, 0, 35)
+confirmTitle.Position = UDim2.fromOffset(15, 15)
+confirmTitle.BackgroundTransparency = 1
+confirmTitle.Text = "Close Script Hub?"
+confirmTitle.TextColor3 = Color3.fromRGB(245, 245, 248)
+confirmTitle.TextSize = 17
+confirmTitle.Font = Enum.Font.GothamBold
+confirmTitle.ZIndex = 21
+confirmTitle.Parent = confirmation
+
+local confirmText = Instance.new("TextLabel")
+confirmText.Size = UDim2.new(1, -30, 0, 42)
+confirmText.Position = UDim2.fromOffset(15, 52)
+confirmText.BackgroundTransparency = 1
+confirmText.Text = "Are you sure you want to close BABY MINIONS?"
+confirmText.TextColor3 = Color3.fromRGB(175, 175, 185)
+confirmText.TextSize = 12
+confirmText.Font = Enum.Font.Gotham
+confirmText.ZIndex = 21
+confirmText.Parent = confirmation
+
+local cancel = Instance.new("TextButton")
+cancel.Size = UDim2.fromOffset(125, 38)
+cancel.Position = UDim2.new(0, 20, 1, -52)
+cancel.BackgroundColor3 = Color3.fromRGB(43, 43, 50)
+cancel.Text = "CANCEL"
+cancel.TextColor3 = Color3.fromRGB(225, 225, 230)
+cancel.TextSize = 12
+cancel.Font = Enum.Font.GothamBold
+cancel.AutoButtonColor = false
+cancel.ZIndex = 21
+cancel.Parent = confirmation
+
+local cancelCorner = Instance.new("UICorner")
+cancelCorner.CornerRadius = UDim.new(0, 9)
+cancelCorner.Parent = cancel
+
+local confirmClose = Instance.new("TextButton")
+confirmClose.Size = UDim2.fromOffset(125, 38)
+confirmClose.Position = UDim2.new(1, -145, 1, -52)
+confirmClose.BackgroundColor3 = Color3.fromRGB(75, 65, 85)
+confirmClose.Text = "CLOSE"
+confirmClose.TextColor3 = Color3.fromRGB(255, 255, 255)
+confirmClose.TextSize = 12
+confirmClose.Font = Enum.Font.GothamBold
+confirmClose.AutoButtonColor = false
+confirmClose.ZIndex = 21
+confirmClose.Parent = confirmation
+
+local confirmCloseCorner = Instance.new("UICorner")
+confirmCloseCorner.CornerRadius = UDim.new(0, 9)
+confirmCloseCorner.Parent = confirmClose
+
+close.MouseButton1Click:Connect(function()
+	confirmation.Visible = true
+end)
+
+cancel.MouseButton1Click:Connect(function()
+	confirmation.Visible = false
+end)
+
+confirmClose.MouseButton1Click:Connect(function()
+	gui:Destroy()
+end)
