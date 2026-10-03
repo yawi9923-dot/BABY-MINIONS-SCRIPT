@@ -18,12 +18,12 @@ local gui = Instance.new("ScreenGui")
 gui.Name = "BabyMinionsScriptHub"
 gui.ResetOnSpawn = false
 gui.IgnoreGuiInset = true
-gui.ZIndexBehavior = Enum.ZIndexBehavior.Global
+gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 gui.DisplayOrder = 999999
 gui.Parent = playerGui
 
 local NORMAL_SIZE = UDim2.fromOffset(620, 400)
-local MINI_SIZE = UDim2.fromOffset(158, 38)
+local MINI_SIZE = UDim2.fromOffset(132, 38)
 local CENTER_POSITION = UDim2.fromScale(0.5, 0.5)
 
 local tweenInfo = TweenInfo.new(
@@ -50,7 +50,6 @@ main.AnchorPoint = Vector2.new(0.5, 0.5)
 main.BackgroundColor3 = Color3.fromRGB(24, 24, 28)
 main.BorderSizePixel = 0
 main.Visible = false
-main.ZIndex = 1
 main.Parent = gui
 
 local mainCorner = Instance.new("UICorner")
@@ -66,7 +65,6 @@ local header = Instance.new("Frame")
 header.Name = "Header"
 header.Size = UDim2.new(1, 0, 0, 54)
 header.BackgroundTransparency = 1
-header.ZIndex = 2
 header.Parent = main
 
 local title = Instance.new("TextLabel")
@@ -78,7 +76,6 @@ title.TextColor3 = Color3.fromRGB(245, 245, 248)
 title.TextSize = 16
 title.Font = Enum.Font.GothamBold
 title.TextXAlignment = Enum.TextXAlignment.Left
-title.ZIndex = 3
 title.Parent = header
 
 local minimize = Instance.new("TextButton")
@@ -91,7 +88,6 @@ minimize.TextColor3 = Color3.fromRGB(225, 225, 230)
 minimize.TextSize = 18
 minimize.Font = Enum.Font.GothamBold
 minimize.AutoButtonColor = false
-minimize.ZIndex = 3
 minimize.Parent = header
 
 local minCorner = Instance.new("UICorner")
@@ -108,12 +104,15 @@ close.TextColor3 = Color3.fromRGB(225, 225, 230)
 close.TextSize = 20
 close.Font = Enum.Font.GothamBold
 close.AutoButtonColor = false
-close.ZIndex = 3
 close.Parent = header
 
 local closeCorner = Instance.new("UICorner")
 closeCorner.CornerRadius = UDim.new(0, 8)
 closeCorner.Parent = close
+
+----------------------------------------------------------------
+-- SIDEBAR
+----------------------------------------------------------------
 
 local sidebar = Instance.new("ScrollingFrame")
 sidebar.Name = "Sidebar"
@@ -127,7 +126,6 @@ sidebar.CanvasSize = UDim2.new(0, 0, 0, 0)
 sidebar.AutomaticCanvasSize = Enum.AutomaticSize.Y
 sidebar.ElasticBehavior = Enum.ElasticBehavior.Never
 sidebar.ScrollingDirection = Enum.ScrollingDirection.Y
-sidebar.ZIndex = 2
 sidebar.Parent = main
 
 local searchBox = Instance.new("TextBox")
@@ -142,7 +140,6 @@ searchBox.PlaceholderColor3 = Color3.fromRGB(120, 120, 130)
 searchBox.TextSize = 13
 searchBox.Font = Enum.Font.GothamMedium
 searchBox.ClearTextOnFocus = false
-searchBox.ZIndex = 3
 searchBox.Parent = sidebar
 
 local searchCorner = Instance.new("UICorner")
@@ -160,7 +157,6 @@ tabsContainer.Size = UDim2.new(1, 0, 0, 0)
 tabsContainer.Position = UDim2.fromOffset(0, 56)
 tabsContainer.BackgroundTransparency = 1
 tabsContainer.AutomaticSize = Enum.AutomaticSize.Y
-tabsContainer.ZIndex = 3
 tabsContainer.Parent = sidebar
 
 local tabs = {
@@ -177,7 +173,6 @@ content.Name = "Content"
 content.Size = UDim2.new(1, -175, 1, -54)
 content.Position = UDim2.fromOffset(175, 54)
 content.BackgroundTransparency = 1
-content.ZIndex = 2
 content.Parent = main
 
 local pages = {}
@@ -195,7 +190,6 @@ local function createTabButton(tabName, index)
 	button.TextSize = 13
 	button.Font = Enum.Font.GothamMedium
 	button.AutoButtonColor = false
-	button.ZIndex = 4
 	button.Parent = tabsContainer
 
 	local buttonCorner = Instance.new("UICorner")
@@ -214,7 +208,6 @@ local function createTabButton(tabName, index)
 	page.BackgroundTransparency = 1
 	page.BorderSizePixel = 0
 	page.Visible = index == 1
-	page.ZIndex = 3
 	page.Parent = content
 
 	pages[tabName] = page
@@ -290,7 +283,6 @@ local function createScriptCard(parent, scriptName, scriptCode, index)
 	)
 	card.BackgroundColor3 = Color3.fromRGB(30, 30, 36)
 	card.BorderSizePixel = 0
-	card.ZIndex = 4
 	card.Parent = parent
 
 	local cardCorner = Instance.new("UICorner")
@@ -306,7 +298,6 @@ local function createScriptCard(parent, scriptName, scriptCode, index)
 	nameLabel.TextSize = 14
 	nameLabel.Font = Enum.Font.GothamSemibold
 	nameLabel.TextXAlignment = Enum.TextXAlignment.Left
-	nameLabel.ZIndex = 5
 	nameLabel.Parent = card
 
 	local textLabel = Instance.new("TextLabel")
@@ -318,7 +309,6 @@ local function createScriptCard(parent, scriptName, scriptCode, index)
 	textLabel.TextSize = 12
 	textLabel.Font = Enum.Font.Gotham
 	textLabel.TextXAlignment = Enum.TextXAlignment.Left
-	textLabel.ZIndex = 5
 	textLabel.Parent = card
 
 	local play = Instance.new("TextButton")
@@ -331,7 +321,6 @@ local function createScriptCard(parent, scriptName, scriptCode, index)
 	play.TextSize = 11
 	play.Font = Enum.Font.GothamBold
 	play.AutoButtonColor = false
-	play.ZIndex = 5
 	play.Parent = card
 
 	local playCorner = Instance.new("UICorner")
@@ -363,23 +352,20 @@ local function createScriptCard(parent, scriptName, scriptCode, index)
 
 		if success then
 			play.Text = "EXECUTED"
-			play.BackgroundColor3 =
-				Color3.fromRGB(60, 150, 80)
+			play.BackgroundColor3 = Color3.fromRGB(60, 150, 80)
 
 			task.delay(1.5, function()
 				if play and play.Parent then
 					play.Text = "PLAY"
 
 					tween(play, {
-						BackgroundColor3 =
-							Color3.fromRGB(70, 130, 90)
+						BackgroundColor3 = Color3.fromRGB(70, 130, 90)
 					})
 				end
 			end)
 		else
 			play.Text = "ERROR"
-			play.BackgroundColor3 =
-				Color3.fromRGB(150, 60, 60)
+			play.BackgroundColor3 = Color3.fromRGB(150, 60, 60)
 
 			warn(
 				"[Baby Minions Hub] Failed to execute "
@@ -393,8 +379,7 @@ local function createScriptCard(parent, scriptName, scriptCode, index)
 					play.Text = "PLAY"
 
 					tween(play, {
-						BackgroundColor3 =
-							Color3.fromRGB(70, 130, 90)
+						BackgroundColor3 = Color3.fromRGB(70, 130, 90)
 					})
 				end
 			end)
@@ -483,14 +468,16 @@ miniDragArea.Parent = main
 
 local miniTitle = Instance.new("TextLabel")
 miniTitle.Name = "MiniTitle"
-miniTitle.Size = UDim2.new(1, -55, 1, 0)
-miniTitle.Position = UDim2.fromOffset(12, 0)
+miniTitle.Size = UDim2.new(1, -46, 1, 0)
+miniTitle.Position = UDim2.fromOffset(10, 0)
 miniTitle.BackgroundTransparency = 1
 miniTitle.Text = "Baby Minions"
 miniTitle.TextColor3 = Color3.fromRGB(245, 245, 248)
-miniTitle.TextSize = 13
+miniTitle.TextSize = 12
 miniTitle.Font = Enum.Font.GothamBold
 miniTitle.TextXAlignment = Enum.TextXAlignment.Left
+miniTitle.TextYAlignment = Enum.TextYAlignment.Center
+miniTitle.TextTruncate = Enum.TextTruncate.AtEnd
 miniTitle.Visible = false
 miniTitle.ZIndex = 11
 miniTitle.Parent = main
@@ -546,32 +533,28 @@ local function startMiniDrag(input)
 		miniDragConnection:Disconnect()
 	end
 
-	miniDragConnection =
-		UserInputService.InputChanged:Connect(function(changedInput)
-			if not draggingMini then
-				return
-			end
+	miniDragConnection = UserInputService.InputChanged:Connect(function(changedInput)
+		if not draggingMini then
+			return
+		end
 
-			if changedInput.UserInputType
-				~= Enum.UserInputType.MouseMovement
-				and changedInput.UserInputType
-				~= Enum.UserInputType.Touch then
-				return
-			end
+		if changedInput.UserInputType ~= Enum.UserInputType.MouseMovement
+			and changedInput.UserInputType ~= Enum.UserInputType.Touch then
+			return
+		end
 
-			local delta =
-				changedInput.Position - dragStart
+		local delta = changedInput.Position - dragStart
 
-			local newPosition = UDim2.new(
-				dragStartPosition.X.Scale,
-				dragStartPosition.X.Offset + delta.X,
-				dragStartPosition.Y.Scale,
-				dragStartPosition.Y.Offset + delta.Y
-			)
+		local newPosition = UDim2.new(
+			dragStartPosition.X.Scale,
+			dragStartPosition.X.Offset + delta.X,
+			dragStartPosition.Y.Scale,
+			dragStartPosition.Y.Offset + delta.Y
+		)
 
-			main.Position = newPosition
-			miniPosition = newPosition
-		end)
+		main.Position = newPosition
+		miniPosition = newPosition
+	end)
 end
 
 miniDragArea.InputBegan:Connect(startMiniDrag)
