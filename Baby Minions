@@ -50,6 +50,7 @@ main.AnchorPoint = Vector2.new(0.5, 0.5)
 main.BackgroundColor3 = Color3.fromRGB(24, 24, 28)
 main.BorderSizePixel = 0
 main.Visible = false
+main.ZIndex = 2
 main.Parent = gui
 
 local mainCorner = Instance.new("UICorner")
@@ -65,6 +66,7 @@ local header = Instance.new("Frame")
 header.Name = "Header"
 header.Size = UDim2.new(1, 0, 0, 54)
 header.BackgroundTransparency = 1
+header.ZIndex = 3
 header.Parent = main
 
 local title = Instance.new("TextLabel")
@@ -76,6 +78,7 @@ title.TextColor3 = Color3.fromRGB(245, 245, 248)
 title.TextSize = 16
 title.Font = Enum.Font.GothamBold
 title.TextXAlignment = Enum.TextXAlignment.Left
+title.ZIndex = 4
 title.Parent = header
 
 local minimize = Instance.new("TextButton")
@@ -88,6 +91,7 @@ minimize.TextColor3 = Color3.fromRGB(225, 225, 230)
 minimize.TextSize = 18
 minimize.Font = Enum.Font.GothamBold
 minimize.AutoButtonColor = false
+minimize.ZIndex = 5
 minimize.Parent = header
 
 local minCorner = Instance.new("UICorner")
@@ -104,6 +108,7 @@ close.TextColor3 = Color3.fromRGB(225, 225, 230)
 close.TextSize = 20
 close.Font = Enum.Font.GothamBold
 close.AutoButtonColor = false
+close.ZIndex = 5
 close.Parent = header
 
 local closeCorner = Instance.new("UICorner")
@@ -126,6 +131,7 @@ sidebar.CanvasSize = UDim2.new(0, 0, 0, 0)
 sidebar.AutomaticCanvasSize = Enum.AutomaticSize.Y
 sidebar.ElasticBehavior = Enum.ElasticBehavior.Never
 sidebar.ScrollingDirection = Enum.ScrollingDirection.Y
+sidebar.ZIndex = 3
 sidebar.Parent = main
 
 local searchBox = Instance.new("TextBox")
@@ -140,6 +146,7 @@ searchBox.PlaceholderColor3 = Color3.fromRGB(120, 120, 130)
 searchBox.TextSize = 13
 searchBox.Font = Enum.Font.GothamMedium
 searchBox.ClearTextOnFocus = false
+searchBox.ZIndex = 4
 searchBox.Parent = sidebar
 
 local searchCorner = Instance.new("UICorner")
@@ -157,6 +164,7 @@ tabsContainer.Size = UDim2.new(1, 0, 0, 0)
 tabsContainer.Position = UDim2.fromOffset(0, 56)
 tabsContainer.BackgroundTransparency = 1
 tabsContainer.AutomaticSize = Enum.AutomaticSize.Y
+tabsContainer.ZIndex = 4
 tabsContainer.Parent = sidebar
 
 local tabs = {
@@ -173,6 +181,7 @@ content.Name = "Content"
 content.Size = UDim2.new(1, -175, 1, -54)
 content.Position = UDim2.fromOffset(175, 54)
 content.BackgroundTransparency = 1
+content.ZIndex = 3
 content.Parent = main
 
 local pages = {}
@@ -190,6 +199,7 @@ local function createTabButton(tabName, index)
 	button.TextSize = 13
 	button.Font = Enum.Font.GothamMedium
 	button.AutoButtonColor = false
+	button.ZIndex = 5
 	button.Parent = tabsContainer
 
 	local buttonCorner = Instance.new("UICorner")
@@ -197,7 +207,10 @@ local function createTabButton(tabName, index)
 	buttonCorner.Parent = button
 
 	tabButtons[tabName] = button
-	allTabData[tabName] = {button = button, index = index}
+	allTabData[tabName] = {
+		button = button,
+		index = index
+	}
 
 	local page = Instance.new("ScrollingFrame")
 	page.Name = tabName
@@ -208,6 +221,7 @@ local function createTabButton(tabName, index)
 	page.BackgroundTransparency = 1
 	page.BorderSizePixel = 0
 	page.Visible = index == 1
+	page.ZIndex = 4
 	page.Parent = content
 
 	pages[tabName] = page
@@ -238,19 +252,36 @@ end
 tabButtons["Steal an Egg"].BackgroundColor3 =
 	Color3.fromRGB(65, 65, 82)
 
+----------------------------------------------------------------
+-- SEARCH
+----------------------------------------------------------------
+
 local function filterTabs(query)
 	query = query:lower()
+
 	local visibleCount = 0
 
-	for tabName, data in pairs(allTabData) do
+	for index, tabName in ipairs(tabs) do
+		local data = allTabData[tabName]
 		local button = data.button
-		local matches = tabName:lower():find(query) ~= nil
+
+		local matches = query == ""
+			or tabName:lower():find(query, 1, true) ~= nil
 
 		button.Visible = matches
 
 		if matches then
-			button.Position = UDim2.fromOffset(10, visibleCount * 50)
+			button.Position = UDim2.fromOffset(
+				10,
+				visibleCount * 50
+			)
+
 			visibleCount = visibleCount + 1
+		else
+			button.Position = UDim2.fromOffset(
+				10,
+				(index - 1) * 50
+			)
 		end
 	end
 end
@@ -267,6 +298,8 @@ end)
 searchBox.FocusLost:Connect(function()
 	tween(searchStroke, {Transparency = 0.5})
 	searchBox.BackgroundColor3 = Color3.fromRGB(29, 29, 34)
+
+	filterTabs(searchBox.Text)
 end)
 
 ----------------------------------------------------------------
@@ -283,6 +316,7 @@ local function createScriptCard(parent, scriptName, scriptCode, index)
 	)
 	card.BackgroundColor3 = Color3.fromRGB(30, 30, 36)
 	card.BorderSizePixel = 0
+	card.ZIndex = 5
 	card.Parent = parent
 
 	local cardCorner = Instance.new("UICorner")
@@ -298,6 +332,7 @@ local function createScriptCard(parent, scriptName, scriptCode, index)
 	nameLabel.TextSize = 14
 	nameLabel.Font = Enum.Font.GothamSemibold
 	nameLabel.TextXAlignment = Enum.TextXAlignment.Left
+	nameLabel.ZIndex = 6
 	nameLabel.Parent = card
 
 	local textLabel = Instance.new("TextLabel")
@@ -309,6 +344,7 @@ local function createScriptCard(parent, scriptName, scriptCode, index)
 	textLabel.TextSize = 12
 	textLabel.Font = Enum.Font.Gotham
 	textLabel.TextXAlignment = Enum.TextXAlignment.Left
+	textLabel.ZIndex = 6
 	textLabel.Parent = card
 
 	local play = Instance.new("TextButton")
@@ -321,6 +357,7 @@ local function createScriptCard(parent, scriptName, scriptCode, index)
 	play.TextSize = 11
 	play.Font = Enum.Font.GothamBold
 	play.AutoButtonColor = false
+	play.ZIndex = 7
 	play.Parent = card
 
 	local playCorner = Instance.new("UICorner")
