@@ -3,23 +3,43 @@ local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 
 local player = Players.LocalPlayer
+if not player then
+	return
+end
+
+local playerGui = player:WaitForChild("PlayerGui")
+
+local oldGui = playerGui:FindFirstChild("BabyMinionsScriptHub")
+if oldGui then
+	oldGui:Destroy()
+end
 
 local gui = Instance.new("ScreenGui")
 gui.Name = "BabyMinionsScriptHub"
 gui.ResetOnSpawn = false
-gui.Parent = player:WaitForChild("PlayerGui")
+gui.IgnoreGuiInset = true
+gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+gui.Parent = playerGui
 
 local NORMAL_SIZE = UDim2.fromOffset(620, 400)
 local MINI_SIZE = UDim2.fromOffset(158, 38)
 local CENTER_POSITION = UDim2.fromScale(0.5, 0.5)
 
-local tweenInfo = TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
+local tweenInfo = TweenInfo.new(
+	0.25,
+	Enum.EasingStyle.Quint,
+	Enum.EasingDirection.Out
+)
 
 local function tween(object, properties)
 	local t = TweenService:Create(object, tweenInfo, properties)
 	t:Play()
 	return t
 end
+
+----------------------------------------------------------------
+-- MAIN HUB
+----------------------------------------------------------------
 
 local main = Instance.new("Frame")
 main.Name = "Main"
@@ -28,6 +48,7 @@ main.Position = CENTER_POSITION
 main.AnchorPoint = Vector2.new(0.5, 0.5)
 main.BackgroundColor3 = Color3.fromRGB(24, 24, 28)
 main.BorderSizePixel = 0
+main.Visible = false
 main.Parent = gui
 
 local mainCorner = Instance.new("UICorner")
@@ -99,7 +120,9 @@ sidebar.Parent = main
 local tabs = {
 	"Steal an Egg",
 	"Ride a Pet",
-	"Hospital Anomaly"
+	"Hospital Anomaly",
+	"Dig & Clean",
+	"99 Nights"
 }
 
 local content = Instance.new("Frame")
@@ -116,7 +139,10 @@ for i, tabName in ipairs(tabs) do
 	local button = Instance.new("TextButton")
 	button.Name = tabName .. "Button"
 	button.Size = UDim2.new(1, -20, 0, 42)
-	button.Position = UDim2.fromOffset(10, 10 + ((i - 1) * 50))
+	button.Position = UDim2.fromOffset(
+		10,
+		10 + ((i - 1) * 50)
+	)
 	button.BackgroundColor3 = Color3.fromRGB(29, 29, 34)
 	button.Text = tabName
 	button.TextColor3 = Color3.fromRGB(190, 190, 198)
@@ -138,6 +164,7 @@ for i, tabName in ipairs(tabs) do
 	page.AutomaticCanvasSize = Enum.AutomaticSize.Y
 	page.ScrollBarThickness = 3
 	page.BackgroundTransparency = 1
+	page.BorderSizePixel = 0
 	page.Visible = i == 1
 	page.Parent = content
 
@@ -162,12 +189,26 @@ for i, tabName in ipairs(tabs) do
 	end)
 end
 
-tabButtons["Steal an Egg"].BackgroundColor3 = Color3.fromRGB(65, 65, 82)
+tabButtons["Steal an Egg"].BackgroundColor3 =
+	Color3.fromRGB(65, 65, 82)
 
-local function createScriptCard(parent, scriptName, scriptCode, index)
+----------------------------------------------------------------
+-- SCRIPT CARDS
+----------------------------------------------------------------
+
+local function createScriptCard(
+	parent,
+	scriptName,
+	scriptCode,
+	index
+)
 	local card = Instance.new("Frame")
+	card.Name = scriptName .. "Card"
 	card.Size = UDim2.new(1, -36, 0, 82)
-	card.Position = UDim2.fromOffset(18, 18 + ((index - 1) * 94))
+	card.Position = UDim2.fromOffset(
+		18,
+		18 + ((index - 1) * 94)
+	)
 	card.BackgroundColor3 = Color3.fromRGB(30, 30, 36)
 	card.BorderSizePixel = 0
 	card.Parent = parent
@@ -228,31 +269,49 @@ local function createScriptCard(parent, scriptName, scriptCode, index)
 
 	play.MouseButton1Click:Connect(function()
 		local success, err = pcall(function()
-			loadstring(scriptCode)()
+			local fn = loadstring(scriptCode)
+
+			if not fn then
+				error("loadstring returned nil")
+			end
+
+			fn()
 		end)
 
 		if success then
 			play.Text = "EXECUTED"
-			play.BackgroundColor3 = Color3.fromRGB(60, 150, 80)
+			play.BackgroundColor3 =
+				Color3.fromRGB(60, 150, 80)
 
 			task.delay(1.5, function()
 				if play and play.Parent then
 					play.Text = "PLAY"
+
 					tween(play, {
-						BackgroundColor3 = Color3.fromRGB(70, 130, 90)
+						BackgroundColor3 =
+							Color3.fromRGB(70, 130, 90)
 					})
 				end
 			end)
 		else
 			play.Text = "ERROR"
-			play.BackgroundColor3 = Color3.fromRGB(150, 60, 60)
-			warn("[Baby Minions Hub] Failed to execute " .. scriptName .. ": " .. tostring(err))
+			play.BackgroundColor3 =
+				Color3.fromRGB(150, 60, 60)
+
+			warn(
+				"[Baby Minions Hub] Failed to execute "
+					.. scriptName
+					.. ": "
+					.. tostring(err)
+			)
 
 			task.delay(1.5, function()
 				if play and play.Parent then
 					play.Text = "PLAY"
+
 					tween(play, {
-						BackgroundColor3 = Color3.fromRGB(70, 130, 90)
+						BackgroundColor3 =
+							Color3.fromRGB(70, 130, 90)
 					})
 				end
 			end)
@@ -295,9 +354,26 @@ createScriptCard(
 	1
 )
 
-local minimized = false
+createScriptCard(
+	pages["Dig & Clean"],
+	"BLOBBY HUB SCRIPT",
+	'loadstring(game:HttpGet("https://raw.githubusercontent.com/Someone636/blobbyhub/refs/heads/main/DC.luau"))()',
+	1
+)
 
-local miniPosition = UDim2.fromScale(0.5, 0.5)
+createScriptCard(
+	pages["99 Nights"],
+	"FOX NAME SCRIPT",
+	'loadstring(game:HttpGet("https://raw.githubusercontent.com/caomod2077/Script/refs/heads/main/FoxnameHub.lua"))()',
+	1
+)
+
+----------------------------------------------------------------
+-- MINIMIZE
+----------------------------------------------------------------
+
+local minimized = false
+local miniPosition = CENTER_POSITION
 
 local draggingMini = false
 local dragStart = nil
@@ -380,28 +456,34 @@ local function startMiniDrag(input)
 		miniDragConnection:Disconnect()
 	end
 
-	miniDragConnection = UserInputService.InputChanged:Connect(function(changedInput)
-		if not draggingMini then
-			return
-		end
-
-		if changedInput.UserInputType ~= Enum.UserInputType.MouseMovement
-			and changedInput.UserInputType ~= Enum.UserInputType.Touch then
-			return
-		end
-
-		local delta = changedInput.Position - dragStart
-
-		local newPosition = UDim2.new(
-			dragStartPosition.X.Scale,
-			dragStartPosition.X.Offset + delta.X,
-			dragStartPosition.Y.Scale,
-			dragStartPosition.Y.Offset + delta.Y
+	miniDragConnection =
+		UserInputService.InputChanged:Connect(function(
+			changedInput
 		)
+			if not draggingMini then
+				return
+			end
 
-		main.Position = newPosition
-		miniPosition = newPosition
-	end)
+			if changedInput.UserInputType
+				~= Enum.UserInputType.MouseMovement
+				and changedInput.UserInputType
+				~= Enum.UserInputType.Touch then
+				return
+			end
+
+			local delta =
+				changedInput.Position - dragStart
+
+			local newPosition = UDim2.new(
+				dragStartPosition.X.Scale,
+				dragStartPosition.X.Offset + delta.X,
+				dragStartPosition.Y.Scale,
+				dragStartPosition.Y.Offset + delta.Y
+			)
+
+			main.Position = newPosition
+			miniPosition = newPosition
+		end)
 end
 
 miniDragArea.InputBegan:Connect(startMiniDrag)
@@ -463,6 +545,10 @@ minimize.MouseButton1Click:Connect(function()
 	end)
 end)
 
+----------------------------------------------------------------
+-- CLOSE CONFIRMATION
+----------------------------------------------------------------
+
 local confirmation = Instance.new("Frame")
 confirmation.Name = "CloseConfirmation"
 confirmation.Size = UDim2.fromOffset(330, 170)
@@ -498,7 +584,8 @@ local confirmText = Instance.new("TextLabel")
 confirmText.Size = UDim2.new(1, -30, 0, 42)
 confirmText.Position = UDim2.fromOffset(15, 52)
 confirmText.BackgroundTransparency = 1
-confirmText.Text = "Are you sure you want to close BABY MINIONS?"
+confirmText.Text =
+	"Are you sure you want to close BABY MINIONS?"
 confirmText.TextColor3 = Color3.fromRGB(175, 175, 185)
 confirmText.TextSize = 12
 confirmText.Font = Enum.Font.Gotham
@@ -548,3 +635,296 @@ end)
 confirmClose.MouseButton1Click:Connect(function()
 	gui:Destroy()
 end)
+
+----------------------------------------------------------------
+-- OPENING ANIMATION
+----------------------------------------------------------------
+
+local opening = Instance.new("Frame")
+opening.Name = "Opening"
+opening.Size = UDim2.fromScale(1, 1)
+opening.Position = UDim2.fromScale(0, 0)
+opening.BackgroundColor3 = Color3.fromRGB(14, 14, 18)
+opening.BorderSizePixel = 0
+opening.ZIndex = 100
+opening.Parent = gui
+
+local openingScale = Instance.new("UIScale")
+openingScale.Scale = 0.94
+openingScale.Parent = opening
+
+local openingTitle = Instance.new("TextLabel")
+openingTitle.Size = UDim2.new(1, 0, 0, 50)
+openingTitle.Position = UDim2.new(0.5, 0, 0.5, -55)
+openingTitle.AnchorPoint = Vector2.new(0.5, 0.5)
+openingTitle.BackgroundTransparency = 1
+openingTitle.Text = "BABY MINIONS"
+openingTitle.TextColor3 = Color3.fromRGB(245, 245, 248)
+openingTitle.TextTransparency = 1
+openingTitle.TextSize = 30
+openingTitle.Font = Enum.Font.GothamBold
+openingTitle.ZIndex = 101
+openingTitle.Parent = opening
+
+local openingLine = Instance.new("Frame")
+openingLine.Size = UDim2.fromOffset(0, 2)
+openingLine.Position = UDim2.new(0.5, 0, 0.5, -18)
+openingLine.AnchorPoint = Vector2.new(0.5, 0.5)
+openingLine.BackgroundColor3 = Color3.fromRGB(105, 95, 150)
+openingLine.BorderSizePixel = 0
+openingLine.ZIndex = 101
+openingLine.Parent = opening
+
+local lineCorner = Instance.new("UICorner")
+lineCorner.CornerRadius = UDim.new(1, 0)
+lineCorner.Parent = openingLine
+
+local openingSubtitle = Instance.new("TextLabel")
+openingSubtitle.Size = UDim2.new(1, 0, 0, 30)
+openingSubtitle.Position = UDim2.new(0.5, 0, 0.5, 5)
+openingSubtitle.AnchorPoint = Vector2.new(0.5, 0.5)
+openingSubtitle.BackgroundTransparency = 1
+openingSubtitle.Text = "SCRIPT HUB"
+openingSubtitle.TextColor3 = Color3.fromRGB(155, 155, 170)
+openingSubtitle.TextTransparency = 1
+openingSubtitle.TextSize = 13
+openingSubtitle.Font = Enum.Font.GothamMedium
+openingSubtitle.ZIndex = 101
+openingSubtitle.Parent = opening
+
+local loadingBackground = Instance.new("Frame")
+loadingBackground.Size = UDim2.fromOffset(300, 6)
+loadingBackground.Position = UDim2.new(0.5, 0, 0.5, 48)
+loadingBackground.AnchorPoint = Vector2.new(0.5, 0.5)
+loadingBackground.BackgroundColor3 = Color3.fromRGB(38, 38, 45)
+loadingBackground.BackgroundTransparency = 1
+loadingBackground.BorderSizePixel = 0
+loadingBackground.ZIndex = 101
+loadingBackground.Parent = opening
+
+local loadingCorner = Instance.new("UICorner")
+loadingCorner.CornerRadius = UDim.new(1, 0)
+loadingCorner.Parent = loadingBackground
+
+local loadingBar = Instance.new("Frame")
+loadingBar.Size = UDim2.new(0, 0, 1, 0)
+loadingBar.BackgroundColor3 = Color3.fromRGB(105, 95, 150)
+loadingBar.BorderSizePixel = 0
+loadingBar.ZIndex = 102
+loadingBar.Parent = loadingBackground
+
+local loadingBarCorner = Instance.new("UICorner")
+loadingBarCorner.CornerRadius = UDim.new(1, 0)
+loadingBarCorner.Parent = loadingBar
+
+local loadingText = Instance.new("TextLabel")
+loadingText.Size = UDim2.fromOffset(300, 25)
+loadingText.Position = UDim2.new(0.5, 0, 0.5, 72)
+loadingText.AnchorPoint = Vector2.new(0.5, 0.5)
+loadingText.BackgroundTransparency = 1
+loadingText.Text = "Initializing..."
+loadingText.TextColor3 = Color3.fromRGB(125, 125, 140)
+loadingText.TextTransparency = 1
+loadingText.TextSize = 11
+loadingText.Font = Enum.Font.Gotham
+loadingText.ZIndex = 101
+loadingText.Parent = opening
+
+TweenService:Create(
+	openingScale,
+	TweenInfo.new(
+		0.8,
+		Enum.EasingStyle.Quint,
+		Enum.EasingDirection.Out
+	),
+	{
+		Scale = 1
+	}
+):Play()
+
+TweenService:Create(
+	openingTitle,
+	TweenInfo.new(
+		0.8,
+		Enum.EasingStyle.Quint,
+		Enum.EasingDirection.Out
+	),
+	{
+		TextTransparency = 0,
+		Position = UDim2.new(0.5, 0, 0.5, -48)
+	}
+):Play()
+
+task.wait(0.35)
+
+TweenService:Create(
+	openingSubtitle,
+	TweenInfo.new(
+		0.6,
+		Enum.EasingStyle.Quint,
+		Enum.EasingDirection.Out
+	),
+	{
+		TextTransparency = 0
+	}
+):Play()
+
+TweenService:Create(
+	openingLine,
+	TweenInfo.new(
+		0.5,
+		Enum.EasingStyle.Quint,
+		Enum.EasingDirection.Out
+	),
+	{
+		Size = UDim2.fromOffset(90, 2)
+	}
+):Play()
+
+TweenService:Create(
+	loadingBackground,
+	TweenInfo.new(0.5),
+	{
+		BackgroundTransparency = 0
+	}
+):Play()
+
+TweenService:Create(
+	loadingText,
+	TweenInfo.new(0.5),
+	{
+		TextTransparency = 0
+	}
+):Play()
+
+task.spawn(function()
+	local messages = {
+		"Initializing...",
+		"Loading scripts...",
+		"Preparing interface...",
+		"Loading modules...",
+		"Almost ready..."
+	}
+
+	for _, message in ipairs(messages) do
+		if not opening.Parent then
+			return
+		end
+
+		loadingText.Text = message
+		task.wait(0.64)
+	end
+end)
+
+local loadingTween = TweenService:Create(
+	loadingBar,
+	TweenInfo.new(
+		3.2,
+		Enum.EasingStyle.Quint,
+		Enum.EasingDirection.Out
+	),
+	{
+		Size = UDim2.new(1, 0, 1, 0)
+	}
+)
+
+loadingTween:Play()
+
+task.wait(3.3)
+
+if opening.Parent then
+	loadingText.Text = "BABY MINIONS READY"
+end
+
+task.wait(0.45)
+
+if not gui.Parent then
+	return
+end
+
+TweenService:Create(
+	openingTitle,
+	TweenInfo.new(0.45, Enum.EasingStyle.Quint, Enum.EasingDirection.In),
+	{
+		TextTransparency = 1
+	}
+):Play()
+
+TweenService:Create(
+	openingSubtitle,
+	TweenInfo.new(0.45, Enum.EasingStyle.Quint, Enum.EasingDirection.In),
+	{
+		TextTransparency = 1
+	}
+):Play()
+
+TweenService:Create(
+	openingLine,
+	TweenInfo.new(0.35),
+	{
+		Size = UDim2.fromOffset(0, 2)
+	}
+):Play()
+
+TweenService:Create(
+	loadingBackground,
+	TweenInfo.new(0.35),
+	{
+		BackgroundTransparency = 1
+	}
+):Play()
+
+TweenService:Create(
+	loadingText,
+	TweenInfo.new(0.35),
+	{
+		TextTransparency = 1
+	}
+):Play()
+
+TweenService:Create(
+	opening,
+	TweenInfo.new(
+		0.6,
+		Enum.EasingStyle.Quint,
+		Enum.EasingDirection.In
+	),
+	{
+		BackgroundTransparency = 1
+	}
+):Play()
+
+task.wait(0.35)
+
+main.Visible = true
+main.Size = UDim2.fromOffset(500, 320)
+main.BackgroundTransparency = 1
+main.Position = CENTER_POSITION
+mainStroke.Transparency = 1
+
+TweenService:Create(
+	main,
+	TweenInfo.new(
+		0.65,
+		Enum.EasingStyle.Back,
+		Enum.EasingDirection.Out
+	),
+	{
+		Size = NORMAL_SIZE,
+		BackgroundTransparency = 0
+	}
+):Play()
+
+TweenService:Create(
+	mainStroke,
+	TweenInfo.new(0.6),
+	{
+		Transparency = 0.25
+	}
+):Play()
+
+task.wait(0.7)
+
+if opening and opening.Parent then
+	opening:Destroy()
+end
